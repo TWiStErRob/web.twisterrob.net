@@ -1,0 +1,106 @@
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script language=JavaScript>
+var jo = ["",
+	/* mela */	"la", "nella", "della", "sulle",
+	/* vino */	"il", "nel", "dei", ["con i", "coi"],
+	/* letto */	"il", "al", "nei", "dal",
+	/* scivolo */	"lo", "dello", ["con lo", "collo"], "dagli",
+	/* autobus */	"l'", "nell'", "dell'", "all'",
+	/* scarpe */	"le", "sulla", "nelle", "della",
+	/* opera */	"l'", "dall'", "dell'", "nell'",
+	/* cinema */	"il", "del", "nel", "al",
+	
+	"nella", "all'", "dei", "dal", "nell'",
+	"sulla", "dei", ["con lo", "collo"], "in", "dai",
+	["con le", "colle"], "del", "al", "sui", "nel",
+	["della", "delle"], "al", "dei",
+];
+</script>
+<script language="JavaScript" src="testszavak.js"></script>
+<LINK href="styles.css" rel=StyleSheet type="text/css">
+<h1>Egészítsd ki a megfelelő szavakkal</h1>
+<i>A névelőket ki kell tölteni a megfelelővel, a prepozíciókat pedig ki kell egészíteni a megfelelő alakkal.</i><br />
+Például: <b>névelő</b> porta -> <b>la</b> porta és <b>a</b> porta -> <b>alla</b> porta
+<table>
+	<tr>
+		<td>alma</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v1 value="névelő"> mela</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v2 value="in"> mela</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v3 value="di"> mela</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v4 value="su"> mele</td>
+	</tr>
+	<tr>
+		<td>bor</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v5 value="névelő"> vino</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v6 value="in"> vino</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v7 value="di"> vini</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v8 value="con"> vini</td>
+	</tr>
+	<tr>
+		<td>ágy</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v9 value="névelő"> letto</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v10 value="a"> letto</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v11 value="in"> letti</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v12 value="da"> letto</td>
+	</tr>
+	<tr>
+		<td>csúszda</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v13 value="névelő"> scivolo</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v14 value="di"> scivolo</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v15 value="con"> scivolo</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v16 value="da"> scivoli</td>
+	</tr>
+	<tr>
+		<td>autóbusz</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v17 value="névelő"> autobus</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v18 value="in"> autobus</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v19 value="di"> autobus</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v20 value="a"> autobus (più di due)</td>
+	</tr>
+	<tr>
+		<td>cipő</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v21 value="névelő"> scarpe</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v22 value="su"> scarpa</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v23 value="in"> scarpe</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v24 value="di"> scarpa</td>
+	</tr>
+	<tr>
+		<td>opera</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v25 value="névelő"> opera</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v26 value="da"> opera</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v27 value="di"> opera</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v28 value="in"> opera</td>
+	</tr>
+	<tr>
+		<td>cinema</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v29 value="névelő"> cinema</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v30 value="di"> cinema</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v31 value="in"> cinema</td>
+		<td><input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v32 value="a"> cinema</td>
+	</tr>
+</table>
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v33 value="in"> casa,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v34 value="a"> università,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v35 value="di"> cellulari,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v36 value="da"> muro,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v37 value="in"> elettricittà,
+<br />
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v38 value="su"> caldaia,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v39 value="di"> medici,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v40 value="con"> scrittore,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v41 value="in"> autunno,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v42 value="da"> treni,
+<br />
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v43 value="con"> matite,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v44 value="di"> vestito,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v45 value="a"> fiume,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v46 value="su"> mercati,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v47 value="in"> parcho,
+<br />
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v48 value="di"> città,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v49 value="a"> teatro,
+<input type=text size=5 onClick="this.select()" onBlur="check(this)" name=v50 value="di"> quadri
+<br />
+<input type=button value="Jóval kitölt" onClick="kitolt()">
+</html>	

@@ -1,0 +1,51 @@
+<html><head>
+<title></title>
+<LINK href=styles.css rel=StyleSheet type="text/css">
+<script language=JavaScript src=szam.js></script>
+</head>
+<body>
+<h1>Számok</h1>
+<i>Tõszámnevek:</i> 1-tõl 20-ig és 30-tól a tízeseknek saját nevük van. 20 fölött egymás után kell tenni a számokat: 63: <i>sessanta + tre = sessantatre</i>. Ha a tízes után <b>1 (uno) vagy 8 (otto)</b> áll, akkor elhagyjuk a tízes utolsó magánhangzóját, mert az 1 és a 8 magánhangzóval kezdõdik: 21: <i>venti + uno = ventuno</i>, 98: <i>novanta + otto = novantotto</i>. A <b>százasokat</b> úgy képezzük, hogy a tíz alatti szám mellé <i>cento</i>-t teszünk: 500: <i>cinque + cento = cinquecento</i>. (Il Cinquecento azt jelenti, hogy 16. század.)<br>
+2-tõl kezdve a tõszámnevek után a fõnév többesszámban van.<br><br>
+<i>Sorszámnevek:</i> A sorszámnevek <b>-o</b> végû melléknevek. 1-tõl 10-ig lásd a táblázatban. 11-tõl a tõszámnév utolsó magánhangzója helyett -esimo (hím), -esima (nõ) lesz. Több számjegy esetén csak az utolsó tag lesz sorszámnév. A sorszámnevek rövidítése: szám + <sup>o</sup>.<br><br>
+Írj be egy számot vagy sorszámot (a sorszámnak '.' vagy 'o' legyen a vége):<br>
+<input type=text name=szambe size=3 maxlength=7 onFocus="this.select()"><input type=button value="Kiír" onClick="Kiszamol(document.all['szambe'].value)">
+<div id=szamki></div>
+<table cellspacing=0 cellpadding=1>
+<tr><td>Szám</td><td>Olasz név</td><td>Sorszám (röv.)</td><td>Sorszámnév (hím)</td><td>Sorszámnév (nõ)</td></tr>
+<tr><td>1</td><td>uno</td><td>1<sup>o</sup></td><td>primo</td><td>prima</td></tr>
+<tr><td>2</td><td>due</td><td>2<sup>o</sup></td><td>secondo</td><td>seconda</td></tr>
+<tr><td>3</td><td>tre</td><td>3<sup>o</sup></td><td>terzo</td><td>terza</td></tr>
+<tr><td>4</td><td>quattro</td><td>4<sup>o</sup></td><td>quarto</td><td>quarta</td></tr>
+<tr><td>5</td><td>cinque</td><td>5<sup>o</sup></td><td>quinto</td><td>quinta</td></tr>
+<tr><td>6</td><td>sei</td><td>6<sup>o</sup></td><td>sesto</td><td>sesta</td></tr>
+<tr><td>7</td><td>sette</td><td>7<sup>o</sup></td><td>settimo</td><td>settima</td></tr>
+<tr><td>8</td><td>otto</td><td>8<sup>o</sup></td><td>ottavo</td><td>ottava</td></tr>
+<tr><td>9</td><td>nove</td><td>9<sup>o</sup></td><td>nono</td><td>nona</td></tr>
+<tr><td>10</td><td>dieci</td><td>10<sup>o</sup></td><td>decimo</td><td>decima</td></tr>
+<tr><td>11</td><td>undici</td><td>11<sup>o</sup></td><td>undicesimo</td><td>undicesima</td></tr>
+<tr><td>12</td><td>dodici</td><td>12<sup>o</sup></td><td>dodicesimo</td><td>dodicesima</td></tr>
+<tr><td>13</td><td>tredici</td><td>13<sup>o</sup></td><td>tredicesimo</td><td>tredicesima</td></tr>
+<tr><td>14</td><td>quattordici</td><td>14<sup>o</sup></td><td>quattordicesmio</td><td>quattordicesima</td></tr>
+<tr><td>15</td><td>quindici</td><td>15<sup>o</sup></td><td>quindicesmio</td><td>quindicesima</td></tr>
+<tr><td>16</td><td>sedici</td><td>16<sup>o</sup></td><td>sedicesmio</td><td>sedicesima</td></tr>
+<tr><td>17</td><td>diciasette</td><td>17<sup>o</sup></td><td>diciasettesmio</td><td>diciasettesima</td></tr>
+<tr><td>18</td><td>diciotto</td><td>18<sup>o</sup></td><td>diciottesmio</td><td>diciottesima</td></tr>
+<tr><td>19</td><td>diciannove</td><td>19<sup>o</sup></td><td>diciannovesmio</td><td>diciannovesima</td></tr>
+<tr><td>20</td><td>venti</td><td>20<sup>o</sup></td><td>ventesmio</td><td>ventesima</td></tr>
+<tr><td>30</td><td>trenta</td><td>30<sup>o</sup></td><td>trentesmio</td><td>trentesima</td></tr>
+<tr><td>40</td><td>quaranta</td><td>40<sup>o</sup></td><td>quarantesmio</td><td>quarantesima</td></tr>
+<tr><td>50</td><td>cinquanta</td><td>50<sup>o</sup></td><td>cinquantesmio</td><td>cinquantesima</td></tr>
+<tr><td>60</td><td>sessanta</td><td>60<sup>o</sup></td><td>sessantesmio</td><td>sessantesima</td></tr>
+<tr><td>70</td><td>settanta</td><td>70<sup>o</sup></td><td>settantesmio</td><td>settantesima</td></tr>
+<tr><td>80</td><td>ottanta</td><td>80<sup>o</sup></td><td>ottantesmio</td><td>ottantesima</td></tr>
+<tr><td>90</td><td>novanta</td><td>90<sup>o</sup></td><td>novantesmio</td><td>novantesima</td></tr>
+<tr><td>100</td><td>cento</td><td>100<sup>o</sup></td><td>centesmio</td><td>centesima</td></tr>
+<tr><td>1 000</td><td>mille</td><td>1 000<sup>o</sup></td><td>millesmio</td><td>millesima</td></tr>
+<tr><td>2 000</td><td>duemila</td><td>2 000<sup>o</sup></td><td>duemilesmio</td><td>duemilesima</td></tr>
+<tr><td>1 000 000</td><td>un millione</td><td>1 000 000<sup>o</sup></td><td>millionesmio</td><td>millionesima</td></tr>
+<tr><td>2 000 000</td><td>due milioni</td><td>2 000 000<sup>o</sup></td><td>milionesmio</td><td>milionesima</td></tr>
+<tr><td>1 000 000 000</td><td>un miliardo</td><td>1 000 000 000<sup>o</sup></td><td>miliardesmio</td><td>miliardesima</td></tr>
+<tr><td>2 000 000 000</td><td>due miliardi</td><td>2 000 000 000<sup>o</sup></td><td>miliardesmio</td><td>miliardesima</td></tr>
+</table>
+</body></html>

@@ -1,0 +1,485 @@
+<?php print('<?xml version="1.0" encoding="UTF-8"?>')?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+	<title>TWiStErRob's Print a Google Calendar</title>
+
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script><!-- hashchange uses $.browser.msie -->
+	<script type="text/javascript" src="http://rawgit.com/cowboy/jquery-hashchange/v1.3/jquery.ba-hashchange.js"></script>
+
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<script type="text/javascript" src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/i18n/jquery-ui-i18n.min.js"></script>
+
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+	<script type="text/javascript" src="https://rawgit.com/moment/moment/2.11.2/min/moment-with-locales.min.js"></script>
+	<script type="text/javascript" src="https://rawgit.com/moment/moment-timezone/0.5.0/builds/moment-timezone-with-data.min.js"></script>
+
+	<script type="text/javascript">/*<![CDATA[*/
+	(function($) {
+	"use strict";
+		if (!('format' in String.prototype)) {
+			String.prototype.format = function() {
+				var args = arguments; // used in inner match-replacement function
+				return this.replace(/{(\d+)}/g, function(match, number) {
+					return typeof args[number] != 'undefined' ? args[number] : match;
+				});
+			};
+		}
+
+		if (!('formatInZone' in moment.fn)) {
+			moment.fn.formatInZone = function(format, offset) {
+				return this.clone().utc().add(offset, 'hours').format(format);
+			}
+		}
+
+		var twister = {
+			utils: {
+				url: {
+					getHashAnchor: function () {
+						// #anchor!param1=value1&param2=&param3=value3
+						var end = window.location.hash.indexOf('!');
+						if (end === -1) end = window.location.hash.length;
+						return window.location.hash.substring(1, end);
+					},
+
+					getHashParam: function (name) {
+						// #anchor!param1=value1&param2=&param3=value3
+						var start = window.location.hash.indexOf('!') + 1;
+						var match = new RegExp('(?:^|&)' + name + '=([^&]*)')
+								.exec(window.location.hash.substring(start));
+						return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+					},
+
+					getQueryParam: function (name) {
+						// ?param1=value1&param2=&param3=value3
+						var match = new RegExp('[?&]' + name + '=([^&]*)')
+								.exec(window.location.search);
+						return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+					}
+				}
+			},
+			google: {
+//				API_KEY: 'AIzaSyBXvXfKmBgW1Rrx-rVzKFfvMIAXSb4-RVE', // DEV
+				API_KEY: 'AIzaSyAvRNwdwdu4ba4E2YK0cMKzo2h4DfK3h04', // PROD
+//				CLIENT_ID: '825745823811-gc9lo8s0dsg33elroq80polh49q5nb7o.apps.googleusercontent.com', // DEV
+				CLIENT_ID: '825745823811-cfov4ph91m4jidbfjla3dubf8mjhtl5h.apps.googleusercontent.com', // PROD
+				SCOPES: ["https://www.googleapis.com/auth/calendar.readonly"],
+				ready: false,
+				authenticated: false,
+				checkAuth: function () {
+					if (twister.google.authenticated) {
+						return false;
+					} else {
+						gapi.auth.authorize({
+							client_id: twister.google.CLIENT_ID,
+							scope: twister.google.SCOPES,
+							immediate: true
+						}, twister.google.handleAuthResult);
+						return true;
+					}
+				},
+				handleAuthClick: function (event) {
+					gapi.auth.authorize({
+						client_id: twister.google.CLIENT_ID,
+						scope: twister.google.SCOPES,
+						immediate: false
+					}, twister.google.handleAuthResult);
+					return false;
+				},
+				handleAuthResult: function (authResult) {
+					if (authResult && !authResult.error) {
+							twister.google.authenticated = true;
+							twister.google.checkSystemReady();
+					} else {
+						$('#events').html('');
+						$('#auth').show();
+					}
+				},
+				googleCalendarReady: function () {
+					gapi.client.setApiKey(twister.google.API_KEY);
+					twister.google.ready = true;
+					twister.google.checkSystemReady();
+				},
+				checkSystemReady: function () {
+					if (twister.google.ready && twister.calendar.lastParams) {
+						twister.calendar.retrieveCalendarEntries(twister.calendar.lastParams);
+					}
+				}
+			},
+			calendar: {
+				init: function (params) {
+					moment.locale(params.lang);
+					$.datepicker.setDefaults($.datepicker.regional[params.lang]);
+
+					var timeZones = $('#timeZone');
+					if (!timeZones.find('option').length) {
+						$.each(_.sortBy(moment.tz.names(), function (value) {
+							return moment.tz(value).utcOffset();
+						}), function (index, value) {
+							timeZones
+									.append($("<option></option>")
+											.attr("value", value)
+											.text(moment.tz(value).format('Z z') + ": " + value));
+						});
+					}
+				},
+
+				renderCalendars: function () {
+					var config = {
+						changeMonth: true,
+						changeYear: true,
+						showButtonPanel: true,
+						showOtherMonths: true,
+						selectOtherMonths: true,
+						showWeek: true,
+						firstDay: 1,
+						numberOfMonths: 2,
+						constrainInput: true,
+						weekHeader: "",
+						showOn: "both",
+						dateFormat: "yy-mm-dd"
+					};
+					$("#from").datepicker($.extend({}, config, {
+						onClose: function (selectedDate) {
+							$("#to").datepicker("option", "minDate", selectedDate);
+						}
+					}));
+					$("#to").datepicker($.extend({}, config, {
+						onClose: function (selectedDate) {
+							$("#from").datepicker("option", "maxDate", selectedDate);
+						}
+					}));
+				},
+
+				retrieveCalendarEntries: function (params) {
+					if (!twister.google.ready) {
+						twister.calendar.lastParams = params;
+						return;
+					}
+					$('#events').text("Loading...");
+					$('#auth').hide();
+					
+					var tz = moment.tz(params.timeZone);
+					var request = gapi.client.calendar.events.list({
+						calendarId: params.calendar,
+						timeMin: moment.tz(params.from + 'T00:00:00.000', params.timeZone).format(),
+						timeMax: moment.tz(params.to + 'T23:59:59.999', params.timeZone).format(),
+						timeZone: params.timeZone,
+						showDeleted: false,
+						singleEvents: true,
+						orderBy: 'startTime'
+					});
+					request.execute(twister.calendar.retrieveCalendarEntries_result);
+				},
+
+				retrieveCalendarEntries_result: function (root) {
+					twister.calendar.updateTitle(root);
+					if (root.timeZone && !$('#timeZone').val()) $('#timeZone').val(root.timeZone).change();
+					$('#from').change();
+					$('#to').change();
+					if (root.error) {
+						if (root.error.code == 404 && twister.google.checkAuth()) {
+							return;
+						}
+						var message = "<b>Error</b> #{3}: {0}<br /><b>Hash</b>: {2}<br /><b>Current</b>: {1}<br /><b>Data</b>: {4}<br />"
+								.format(root.error.message,
+										JSON.stringify(twister.calendar.current),
+										window.location.hash,
+										root.error.code,
+										JSON.stringify(root.error.data)
+								);
+						$('#events').html(message);
+						return;
+					}
+					var allEvents = $.map(root.items, twister.calendar.CalendarEventEntry2Event);
+					var eventGroups = _.groupBy(allEvents, function eventGrouper(event) {
+						// Group events by starting date (those which start on the same day)
+						return moment(event.startDateTime).startOf('day').valueOf();
+					});
+					var sortedDates = _.sortBy(_.keys(eventGroups), _.identity); // the keys are unix epoch numbers of the days
+					var groupUIs = _.map(sortedDates, function groupExtractor(groupKey) {
+						var groupEvents = eventGroups[groupKey];
+						return twister.calendar.EventGroup2UI(/*(int)*/+groupKey, groupEvents);
+					});
+
+					if (!groupUIs.length) {
+						groupUIs = $("<span>No events, try changing the dates or the calendar.</span>");
+					}
+
+					$('#events').empty().append(groupUIs);
+				},
+
+				updateTitle: function (root) {
+					$('#calendarDisplay').text(root.summary || "Calendar Listing");
+					$('title').html("{0}; {1} &ndash; {2} &mdash; TWiStErRob's Print a Google Calendar".format(
+							root.summary || twister.calendar.current.calendar,
+							moment(twister.calendar.current.from, "YYYY-MM-DD").format("LL, dddd"),
+							moment(twister.calendar.current.to, "YYYY-MM-DD").format("LL, dddd")
+					));
+				},
+
+				CalendarEventEntry2Event: function (e) {
+					var event = {
+						original: e,
+						title: e.summary,
+						description: e.description,
+						url: e.htmlLink,
+						location: e.location
+					};
+					event.startDateTime = e.start.dateTime || e.start.date + 'T00:00:00';
+					event.endDateTime = e.end.dateTime || e.end.date + 'T00:00:00';
+					event.startDate = moment(e.start.date || e.start.dateTime).format("LL");
+					event.startTime = e.start.dateTime ? moment(e.start.dateTime).utcOffset(moment.parseZone(e.start.dateTime).utcOffset()).format("HH:mm") : "00:00";
+					event.endDate = moment(e.end.date || e.end.dateTime).format("LL");
+					event.endTime = e.end.dateTime ? moment(e.end.dateTime).utcOffset(moment.parseZone(e.end.dateTime).utcOffset()).format("HH:mm") : "00:00";
+
+					var startDate = moment(e.start.date).startOf('day');
+					var endDate = moment(e.end.date).startOf('day');
+					event.diffDays = startDate.diff(endDate, 'days');
+					event.allDay = e.start.dateTime === undefined && e.end.dateTime === undefined;
+
+					return event;
+				},
+				EventGroup2UI: function (startDate, events) {
+					var title = moment(startDate).format("LL, dddd");
+					var groupBlock = $('<fieldset />')
+							.attr('id', moment(startDate).format("YYYY-MM-DD"))
+							.append($('<legend />').text(title))
+							.append($.map(events, twister.calendar.Event2UI));
+					return groupBlock;
+				},
+				Event2UI: function (event) {
+					var extraDay = event.startDate === event.endDate || event.diffDays === 0 ? ''
+							: ' (' + (event.allDay ? '' : '+ ') + moment.duration(event.diffDays, 'days').humanize() + ')';
+					var eventBlock = $('<div class="event" />');
+					var timeRange = '{0} &ndash; {1}{2}'.format(event.startTime, event.endTime, extraDay);
+					eventBlock.append($('<span class="time" />')
+							.html(event.allDay ? extraDay : timeRange)
+							.attr('title', timeRange)
+					);
+					eventBlock.append($('<a class="title" />')
+							.text(event.title)
+							.attr('href', event.url)
+							.attr('target', '_blank')
+					);
+					eventBlock.append($('<span class="location" />')
+							.text(event.location)
+					);
+					return eventBlock;
+				},
+
+				param_change: function (selector, field) {
+					return function (e) {
+						var paramValue = $(selector).val();
+						twister.calendar.current[field] = paramValue;
+						twister.calendar.current.updateToHash();
+					}
+				},
+
+				hash_change: function (e) {
+					var params = twister.calendar.current;
+					params.updateFromHash();
+					if (params.lang) {
+						twister.calendar.init(params);
+					}
+					if (params.calendar && params.from && params.to) {
+						twister.calendar.retrieveCalendarEntries(params);
+					}
+				}
+			}
+		};
+		function CurrentState() {
+			var calendar = "primary";
+			var from = moment().format("YYYY-MM-DD");
+			var to = moment().add(3, 'weeks').format("YYYY-MM-DD");
+			var timeZone = moment.tz.guess();
+			var lang = window.navigator.userLanguage || window.navigator.language;
+			var that; // the result to be referenced from methods
+
+			function updateFromHash() {
+				calendar = twister.utils.url.getHashParam('calendar') || calendar;
+				from = twister.utils.url.getHashParam('from') || from;
+				to = twister.utils.url.getHashParam('to') || to;
+				timeZone = twister.utils.url.getHashParam('timeZone') || timeZone;
+				lang = twister.utils.url.getHashParam('lang') || lang;
+			}
+
+			function updateToHash() {
+				var hash = '#' + twister.utils.url.getHashAnchor() + '!';
+				hash += '&calendar=' + encodeURIComponent(calendar);
+				hash += '&from=' + encodeURIComponent(from);
+				hash += '&to=' + encodeURIComponent(to);
+				hash += '&timeZone=' + encodeURIComponent(timeZone);
+				hash += '&lang=' + encodeURIComponent(lang);
+				window.location.hash = hash;
+			}
+
+			function writeUI() {
+				$("#calendar").val(calendar).change();
+				$("#to").val(to).change();
+				$("#from").val(from).change();
+				$("#timeZone").val(timeZone).change();
+			}
+
+			function update() {
+				twister.calendar.retrieveCalendarEntries(that);
+			}
+
+			return that = {
+				updateFromHash: updateFromHash,
+				updateToHash: updateToHash,
+				writeUI: writeUI,
+				update: update,
+				get calendar() { return calendar; },
+				get from() { return from; },
+				get to() { return to; },
+				get lang() { return lang; },
+				get timeZone() { return timeZone; },
+				set calendar(value) { calendar = value; },
+				set from(value) { from = value; },
+				set to(value) { to = value; },
+				set lang(value) { lang = value; },
+				set timeZone(value) { timeZone = value; }
+			}
+		}
+
+		$(document).ready(function document_ready() {
+			var status = twister.calendar.current = new CurrentState(); status.updateFromHash();
+			status.writeUI();
+			twister.calendar.init(status);
+			$(twister.calendar.renderCalendars);
+			$('#auth').hide();
+			$('#authorize').click(twister.google.handleAuthClick);
+			$("#calendar").change(twister.calendar.param_change("#calendar", "calendar"));
+			$("#from").change(twister.calendar.param_change("#from", "from"));
+			$("#to").change(twister.calendar.param_change("#to", "to"));
+			$("#timeZone").change(twister.calendar.param_change("#timeZone", "timeZone"));
+			$("#from").change(function() {$("#fromDisplay").text(moment($("#from").val(), "YYYY-MM-DD").format("LL, dddd"));});
+			$("#to").change(function() {$("#toDisplay").text(moment($("#to").val(), "YYYY-MM-DD").format("LL, dddd"));});
+			$("#timeZone").change(function() {$("#timezoneDisplay").text($("#timeZone").val());});
+			$(status).change(function(ev) {
+				console.log(this);
+			});
+			status.writeUI();
+			$('#form').submit(twister.calendar.hash_change);
+			$(window).hashchange(twister.calendar.hash_change);
+			$(window).hashchange();
+			//status.update();
+		});
+
+		window.twister_google_startup = function() {
+			gapi.client.load('calendar', 'v3', twister.google.googleCalendarReady);
+		};
+	})($.noConflict());
+	/*]]>*/</script>
+	<script type="text/javascript" src="https://apis.google.com/js/client.js?onload=twister_google_startup"></script>
+	<style type="text/css">/*<![CDATA[*/
+		#title {
+			font-family: Georgia sans-serif;
+			text-shadow: 2px 1px 3px darkgray;
+		}
+		#range {
+			font-size: medium;
+			clear: both;
+			display: block;
+		}
+		#timezoneDisplay {
+			font-size: x-small;
+		}
+		fieldset {
+			padding-bottom: 0.25em;
+			margin-top: 0.25em;
+			border: none;
+			border-bottom: 2px ridge;
+			border-left: 2px groove;
+			border-bottom-left-radius: 20px;
+			box-shadow: -1px 1px 4px -1px gray;
+		}
+		legend {
+			font-weight: bold;
+			font-size: large;
+			color: black;
+			font-family: Tahoma, sans-serif;
+			text-shadow: 1px 1px 1px darkgray;
+		}
+		.event {
+			clear: both;
+		}
+		.event > .time {
+			font-weight: bold;
+			margin-left: 3em;
+			margin-right: 1em;
+			font-family: sans-serif;
+			text-shadow: 0px 0px 2px darkgray;
+			width: 7em;
+			float: left;
+			text-align: right;
+		}
+		.event > .title {
+			font-family: Verdana, sans-serif;
+			font-weight: bold;
+			float: left;
+		}
+		.event > .location {
+			float: right;
+		}
+
+		#calendar {
+			width: 400px;
+		}
+		#from, #to {
+			width: 70px;
+		}
+
+		@media print {
+			h1 {
+				text-align: center;
+			}
+			* {
+				box-shadow: none !important;
+				text-shadow: none !important;
+				border-radius: 0 !important;
+			}
+			.event > a.title {
+				text-decoration: none;
+				color: black;
+			}
+			#params, #auth, #footer {
+				display: none;
+			}
+		}
+	/*]]>*/</style>
+</head>
+<body>
+	<h1 id="title">
+		<span id="calendarDisplay">Calendar Listing</span>
+		<span id="range"><span id="fromDisplay">from</span> &ndash; <span id="toDisplay">to</span> <span id="timezoneDisplay">(?)</span></span>
+	</h1>
+	<form id="form" action="">
+		<p id="params">
+			<input type="text" id="calendar" title="In Google Calendar: Click on the little arrow on the calendar > Calendar Settings > Calendar Address > copy Calendar ID. Enter 'primary' for your main account calendar (same as your email address usually)." />
+			<button type="submit" id="go">Go</button>
+			<label for="from">from</label>
+			<input type="text" id="from" />
+			<label for="to">to</label>
+			<input type="text" id="to" />
+			<select id="timeZone" title="Time Zone"></select>
+		</p>
+		<p id="auth">
+			You may* need to allow this page to access this calendar: <button id="authorize">Authorize</button><br />
+			*&nbsp;<i>It's possible the calendar just doesn't exists.</i>
+		</p>
+		<div id="events"></div>
+	</form>
+	<footer id="footer">
+		<p>
+			Created by Róbert Papp (TWiStErRob), for more information see the <a href="http://www.twisterrob.net/project/calendar-printer/" target="_blank">project description</a>.
+		</p>
+	</footer>
+	<?php include_once("../../global/analyticstracking.php") ?>
+</body>
+</html>

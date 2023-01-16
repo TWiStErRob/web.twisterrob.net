@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<title>Heap Visualization</title>
+
+	<style type="text/css" id="fouc">
+		body {
+			display: none !important;
+		}
+	</style>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-2.2.0.min.js"></script>
+	<!--https://github.com/cesine/collections/blob/minified_update/collections.min.js-->
+	<!--<script type="text/javascript" src="https://raw.githubusercontent.com/cesine/collections/minified_update/collections.min.js"></script>-->
+
+	<script type="text/javascript">
+		less = {
+			env: "development",
+			logLevel: 2,
+			async: true,
+			dumpLineNumbers: "comments"
+		};
+	</script>
+	<link rel="stylesheet/less" href="style.less" />
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/less.js/2.6.0/less.min.js"></script>
+
+	<script type="text/javascript" src="code.js"></script>
+	<script type="text/javascript" src="HTMLCodeVisitor.js"></script>
+	<script type="text/javascript" src="view.js"></script>
+	<script type="text/javascript">
+		"use strict";
+		less.pageLoadFinished.then(function () {
+			$('#fouc').remove();
+		});
+
+		$(document).ready(function () {
+			wireEvents();
+			$('#example').trigger('change');
+		});
+
+		function getInput() {
+			var input = $('#input').val().split(',');
+			for (var i = 0; i < input.length; ++i) {
+				input[i] = parseInt(input[i], 10);
+				if (!isFinite(input[i])) {
+					input.splice(i, 1);
+					--i;
+				}
+			}
+			return input;
+		}
+
+		function wireEvents() {
+//			$('.vis').on('click', '.array .item', function () {
+//              //.selected { outline: 6px solid red; z-index: 1; }
+//				$(this).toggleClass('selected');
+//			});
+//			$('.code').on('click', '.line', function () {
+//				$(this).toggleClass('active');
+//			});
+			$('#example').change(function () {
+				$.get($(this).val(), function (data/*, status, xhr*/) {
+					$('#exec').val(data);
+					$('#start').click();
+				});
+			});
+			$('#start').click(function () {
+				$('#desc').empty();
+				var builder = eval('(' + $('#exec').val() + ')');
+				var input = getInput();
+				var program = builder(input);
+				// if (typeof program.startAt === 'number') { $('#start-skip').val(program.startAt); }
+				current.startCode(program, $('#code'), $('#vars'));
+				var initialSkip = Math.max(0, parseInt($('#start-skip').val(), 10));
+				if (isNaN(initialSkip)) {
+					while (current.stepToNext()) {
+						/* exhaust steps */
+					}
+				} else {
+					for (var i = 0; i < initialSkip; ++i) {
+						current.stepToNext();
+					}
+				}
+				$('#counter').data('current', initialSkip - 1);
+				$('#next').trigger('click'); // one extra step to start on the first line
+			});
+			$('#next').click(function nextStep() {
+				$(this).prop('disabled', !current.stepToNext());
+				var counter = $('#counter');
+				var val = counter.data('current') + 1 || 0;
+				counter.data('current', val);
+				counter.text(val);
+			});
+			$('#showMagic').click(function () {
+				//$('#start-skip').val($('#counter').text());
+				$('#start').trigger('click');
+			});
+			$('#edit').click(function () {
+				if ($(this).is(':checked')) {
+					$('#exec').show();
+					$('#code').hide();
+				} else {
+					$('#exec').hide();
+					$('#code').show();
+				}
+			});
+			$('.algo')
+					.on('mouseenter', '.var', function () {
+						var name = $(this).data('var-name');
+						$('[data-var-name="' + name + '"]').addClass('highlight');
+					})
+					.on('mouseleave', '.var', function () {
+						var name = $(this).data('var-name');
+						$('[data-var-name="' + name + '"]').removeClass('highlight');
+					})
+//					.on('click', '.var', function () {
+//						var name = $(this).data('var-name');
+//						$('[data-var-name="' + name + '"]').toggleClass('highlight');
+//					})
+			;
+		}
+
+		function stepThrough(main) {
+			var s = new Stepper(main);
+			var ev;
+			while ((ev = s.step()).event != Stepper.event.TERMINATE) {
+				console.log(ev.event + ' ' + ev.elem.lines + ': (' + ev.elem.constructor.name + ')' + ev.elem.toString().replace(/\n/g, ' '));
+			}
+		}
+	</script>
+</head>
+<body class="solarized-light">
+<div class="algo">
+	<fieldset id="code-container">
+		<legend>Code</legend>
+		<div id="code" class="code"></div>
+		<!--suppress HtmlFormInputWithoutLabel -->
+		<textarea id="exec"></textarea>
+	</fieldset>
+	<fieldset id="controls-container">
+		<legend>Controls</legend>
+		<label for="example" accesskey="x">E<u>x</u>ample:&nbsp;</label>
+		<select id="example">
+			<option value="example-arr-sum.js">Array Sum</option>
+			<option value="example-heap.js" selected>Heapify</option>
+		</select>
+		<label for="lang" accesskey="l"><u>L</u>anguage:&nbsp;</label>
+		<select id="lang" title="Code Language" disabled>
+			<option>Java</option>
+		</select>
+		<label for="input" accesskey="i"><u>I</u>nput:&nbsp;</label>
+		<input type="text" id="input" value="1,9,5,6,7,2,4,2,1,3" title="Array" />
+		<label for="controls">Controls:&nbsp;</label>
+		<div id="controls">
+			<button id="start" accesskey="s" title="Restart the session"><u>S</u>tart</button>
+			<label>
+				<input id="start-skip" accesskey="p" type="text" value="0" size="1"
+				       title="How many &quot;Next&quot; button presses to emulate when starting up. Positive numbers are accepted, negatives fall back to 0 and non-numbers step until termination." />
+			</label>
+			at <span id="counter"></span>
+			<button id="next" accesskey="n" title="Go to the next executable expression"><u>N</u>ext</button>
+			<label title="Show magic statements: these are not part of the code, but control the visualization.">
+				<input id="showMagic" accesskey="m" type="checkbox"><u>M</u>agic
+			</label>
+			<label title="Edit source code builder">
+				<input id="edit" accesskey="e" type="checkbox"><u>E</u>dit
+			</label>
+		</div>
+		<label for="legend">Legend:&nbsp;</label>
+		<div id="legend" class="vis">
+			<div class="legend var">
+				<div class="group">
+					<div class="value">value</div>
+					<div class="value highlight none">none</div>
+				</div>
+				<div class="group">
+					<div class="value read">read</div>
+					<div class="value changed">write</div>
+				</div>
+				<div class="group">
+					<div class="value highlight parent">parent</div>
+					<div class="value highlight child">child</div>
+				</div>
+				<div class="group">
+					<div class="value highlight child left">left</div>
+					<div class="value highlight child right">right</div>
+				</div>
+				<div class="group">
+					<div class="value highlight">highlight</div>
+					<div class="value irrelevant">irrelevant</div>
+				</div>
+			</div>
+		</div>
+		<div id="desc" class="description"></div>
+	</fieldset>
+	<fieldset id="vars-container">
+		<legend>Variables</legend>
+		<div id="vars" class="vis">
+			<div class="var">
+			</div>
+		</div>
+	</fieldset>
+</div>
+<div style="display: none;">
+	Heapsort start from half back because those are leaves
+
+	Animate steps of sift-down by highlighting and swapping numbers in tree and array simultaneously.
+
+	Code is high level:
+	while(greatest(p, left(p), right(p)) == p) {
+	...
+	}
+
+	match up variables in code and nodes in tree/elements in arr
+
+	show code of micro-functions (left, right) as hovered
+	highlight what those numbers mean in array, like for left = 2*i + 1 show two different backgrounded i length chunks and match them up in the tree
+
+	Have consistent formatting clues:
+	• Foreground for data type
+	• Background for algorithm active elements (p, left, right)
+	• Border for selection/hover
+
+	Option to switch between 0 and 1 based arrays
+
+	The best part will be the design of decoupling the visuals from the actual data, so hover on arr/node can call highlight(this.data) and it should affect all visual representations.
+
+	Change code language and display algorithmic steps. Each step may highlight non-contiguous parts of the code.
+</div>
+</body>
+</html>

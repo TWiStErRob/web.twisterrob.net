@@ -1,0 +1,620 @@
+@size: 30px;
+@small-space: 4px;
+@space: 8px;
+@highlight-width: 3px;
+@display-font: Verdana, sans-serif;
+@code-font: "Consolas", "Courier New", monospace;
+@code-linenum-width: 35px;
+@code-linenum-padding: @space;
+@color-placeholder: transparent; // Any usage of this should be overridden by something else
+
+html {
+	color-profile: sRGB;
+	// noinspection CssUnknownProperty TODO check why?
+	rendering-intent: auto;
+}
+
+html, body {
+	margin: 0;
+	padding: 0;
+}
+
+@media screen and (max-width: 1880px) {
+	// give some leeway for scrollbar and window borders
+	body::before {
+		display: block;
+		content: "This page was designed for Full-HD resolution (1920x1080), if you have a screen smaller than that please adjust your zoom levels. It's also worth going full screen.";
+		padding: @small-space;
+		margin-bottom: @space;
+		background-color: @solarized-base03;
+		color: @solarized-base1;
+	}
+}
+
+fieldset {
+	display: block;
+	float: left;
+	position: relative;
+	box-sizing: border-box;
+}
+
+#code-container {
+	max-width: 700px;
+
+	#code {
+		display: block;
+		max-width: 80ch;
+	}
+
+	#exec {
+		display: none;
+		min-width: 550px;
+		min-height: 600px;
+
+		white-space: pre;
+		word-wrap: normal;
+		overflow-x: scroll;
+		tab-size: 2;
+	}
+
+}
+
+#controls-container {
+	width: 600px;
+
+	> label {
+		display: block;
+		float: left;
+		margin: @small-space 0;
+		&[for="input"] {
+			clear: both;
+		}
+		&[for="lang"] {
+			margin-left: @space;
+		}
+		&[for="controls"], &[for="legend"] {
+			clear: both;
+		}
+	}
+	> label + input, > label + select, #controls, #legend {
+		float: left;
+		position: relative;
+		top: 4px;
+	}
+
+	#desc {
+		clear: both;
+		font-size: large;
+		padding-top: 1px; // anything other than 0 triggers p.margin-top
+		> p {
+			margin-bottom: 0;
+		}
+	}
+
+	input[type='checkbox'] {
+		vertical-align: middle;
+		bottom: 2px;
+		position: relative;
+	}
+
+	.vis .legend {
+		font-size: 0;
+		.group {
+			display: inline-block;
+			vertical-align: middle;
+		}
+		.value {
+			font-size: @size * 0.5;
+			padding: 4px 8px;
+			margin: @small-space + @highlight-width;
+		}
+	}
+}
+
+#vars-container {
+	width: 600px;
+}
+
+.vis {
+	font-family: @display-font;
+	display: table;
+	border-collapse: collapse;
+
+	.value, .connector {
+		outline: transparent solid 0;
+
+		transition: background 0.5s ease-in,
+		transform 0.25s ease-out,
+		font-size 0.4s linear,
+		opacity 0.25s linear,
+		color 0.3s ease-in,
+		outline 0.2s ease-out,
+		border 0.3s linear;
+	}
+
+	.highlight {
+		z-index: 1;
+		outline: @highlight-width solid @color-placeholder;
+		border-color: transparent !important;
+		&.connector {
+			outline: none;
+		}
+		&.parent {
+			&.connector {
+				background-color: transparent !important;
+			}
+		}
+		&.child {
+			&.connector {
+				background-color: transparent !important;
+			}
+			&.left {
+				&.connector {
+					background-color: transparent !important;
+				}
+			}
+			&.right {
+				&.connector {
+					background-color: transparent !important;
+				}
+			}
+		}
+	}
+
+	.irrelevant {
+		opacity: 0.3;
+	}
+
+	.read, .changed {
+		transform: scale(1.15, 1.15);
+	}
+
+	.var {
+		border: 1px solid @color-placeholder;
+		display: table-row;
+		&.highlight {
+			border-color: initial !important;
+			outline: 3px solid @color-placeholder;
+		}
+		> .var-name {
+			font-family: @code-font;
+			display: table-cell;
+			vertical-align: top;
+			padding: @small-space @space;
+			border-right: 1px dashed @color-placeholder;
+			.dir {
+				vertical-align: super;
+				font-size: 40%;
+			}
+		}
+		> .var-value {
+			display: table-cell;
+			padding: @small-space 0;
+			vertical-align: middle;
+		}
+	}
+
+	.value {
+		font-size: @size * 0.75;
+		text-align: center;
+		cursor: pointer;
+		border: 1px solid @color-placeholder;
+		position: relative;
+
+		&::before {
+			font-size: 75%;
+			font-weight: bold;
+			line-height: 0;
+			position: absolute;
+			right: 0;
+			top: 0;
+		}
+		&.in-progress::before {
+			content: '\02705';
+		}
+		&.done::before {
+			content: '\02714';
+		}
+		&.failed::before {
+			content: '\02718';
+		}
+	}
+
+	.out-of-scope {
+		display: none;
+	}
+	.primitive {
+		display: inline-block;
+		position: relative;
+		min-width: @size;
+		min-height: @size;
+		line-height: @size;
+		text-align: center;
+		padding: 0 @space;
+	}
+	.array {
+		@array-item-border: 2px;
+		@array-index-padding: 4px;
+		counter-reset: array -1;
+		display: inline-block;
+		padding: @highlight-width * 1.5;
+		height: @size + @array-item-border;
+		.item {
+			position: relative;
+			display: inline-block;
+			vertical-align: top;
+			text-align: center;
+		}
+		.length {
+			display: inline-block;
+			padding: 0 @space;
+			height: @size;
+			line-height: @size;
+			font-size: 50%;
+		}
+		.value {
+			margin: 0 @highlight-width;
+			min-width: @size + @array-item-border * 2;
+			height: @size;
+			line-height: @size;
+		}
+		&.with-indices {
+			height: @size + @array-item-border + @size * 0.5;
+			.item::after {
+				position: absolute;
+				top: @size;
+				margin-top: @array-item-border;
+				left: 0;
+				text-align: center;
+				width: 100%;
+				display: inline;
+				font-size: 50%;
+				height: @size / 2;
+				line-height: @size / 2;
+			}
+			.length::after {
+				content: 'len';
+			}
+			.value::after {
+				counter-increment: array;
+				content: counter(array);
+			}
+		}
+	}
+	.heap {
+		padding: @highlight-width * 1.5;
+		@connector-gap: 2px;
+		@connector-height: @space;
+		@connector-width: @size / 15;
+		.node-container {
+			vertical-align: top;
+			display: inline-block;
+			box-sizing: border-box;
+			width: 50%;
+			position: relative;
+			// accommodate for connectors connecting near edge
+			padding-left: @connector-gap / 2;
+			padding-right: @connector-gap / 2;
+		}
+		> .node-container { // the root node's container
+			> .node { // the root node
+				margin-top: 0;
+			}
+			padding-top: 0;
+			width: 100%;
+		}
+
+		.connector {
+			&.hor {
+				width: 50%;
+				height: @connector-height;
+			}
+			&.vert {
+				height: @connector-height;
+				width: 50%;
+			}
+		}
+		.left {
+			&.leaf {
+				padding-right: @highlight-width;
+			}
+			> .connector.vert {
+				margin-left: auto;
+				border-right: @connector-width solid @color-placeholder;
+			}
+			> .connector.hor {
+				border-top: @connector-width solid @color-placeholder;
+				border-left: @connector-width solid @color-placeholder;
+				float: right;
+			}
+		}
+		.right {
+			&.leaf {
+				padding-left: @highlight-width;
+			}
+			> .connector.vert {
+				margin-right: auto;
+				border-left: @connector-width solid @color-placeholder;
+			}
+			> .connector.hor {
+				border-top: @connector-width solid @color-placeholder;
+				border-right: @connector-width solid @color-placeholder;
+				float: left;
+			}
+		}
+		.node {
+			text-align: center;
+			width: @size;
+			margin: @connector-height + @connector-width auto 0 auto;
+		}
+		.node.empty {
+			visibility: hidden;
+		}
+	}
+}
+
+.code {
+	@code-indent: @size;
+	counter-reset: code-line 0;
+	font-family: @code-font;
+	display: inline-block;
+	padding: @space;
+	margin: 0 @code-linenum-width;
+	position: relative;
+	// noinspection CssOverwrittenProperties
+	.block {
+		// first margin left is to have a fallback if browser doesn't support ch
+		margin-left: @code-indent;
+		margin-left: 4ch;
+	}
+
+	.line {
+		counter-increment: code-line;
+		// position: relative; // this won't work, because the line numbers would be indented as well
+		&.active {
+			outline: 1px solid @color-placeholder;
+		}
+		&::before, &::after {
+			//&::selection { color: inherit; background-color: inherit; }
+			content: counter(code-line);
+			position: absolute;
+			width: @code-linenum-width;
+		}
+		&::before {
+			border-right: 1px solid @color-placeholder;
+			padding-right: @code-linenum-padding;
+			left: -@code-linenum-width - @code-linenum-padding;
+			text-align: right;
+		}
+		&::after {
+			border-left: 1px solid @color-placeholder;
+			padding-left: @code-linenum-padding;
+			right: -@code-linenum-width - @code-linenum-padding;
+			text-align: left;
+		}
+	}
+	.highlight {
+		outline: 1px solid @color-placeholder;
+	}
+	.kwd, .typ {
+		font-weight: bold;
+	}
+}
+
+// from http://ethanschoonover.com/solarized#features
+@solarized-base03: #002b36;
+@solarized-base02: #073642;
+@solarized-base01: #586e75;
+@solarized-base00: #657b83;
+@solarized-base0: #839496;
+@solarized-base1: #93a1a1;
+@solarized-base2: #eee8d5;
+@solarized-base3: #fdf6e3;
+@solarized-yellow: #b58900;
+@solarized-orange: #cb4b16;
+@solarized-red: #dc322f;
+@solarized-magenta: #d33682;
+@solarized-violet: #6c71c4;
+@solarized-blue: #268bd2;
+@solarized-cyan: #2aa198;
+@solarized-green: #859900;
+
+@highlight-color: @solarized-blue;
+@read-color: @solarized-green;
+@write-color: @solarized-orange;
+@parent-color: @solarized-yellow;
+@child-color: @solarized-violet;
+@child-left-color: @solarized-cyan;
+@child-right-color: @solarized-magenta;
+
+.solarized-dark {
+	.rebase(@solarized-base3, @solarized-base2, @solarized-base1, @solarized-base0,
+			@solarized-base00, @solarized-base01, @solarized-base02, @solarized-base03);
+}
+
+.solarized-light {
+	.rebase(@solarized-base03, @solarized-base02, @solarized-base01, @solarized-base00,
+			@solarized-base0, @solarized-base1, @solarized-base2, @solarized-base3);
+}
+
+.description {
+	.highlight {
+		color: @highlight-color !important;
+	}
+	.child {
+		color: @child-color !important;
+	}
+	.left.child {
+		color: @child-left-color !important;
+	}
+	.right.child {
+		color: @child-right-color !important;
+	}
+	.parent {
+		color: @parent-color !important;
+	}
+}
+
+.vis {
+	.highlight {
+		outline-color: @highlight-color;
+		&.connector {
+			border-color: @highlight-color !important;
+			&.parent {
+				border-color: @parent-color !important;
+			}
+			&.child {
+				border-color: @child-color !important;
+				&.left {
+					border-color: @child-left-color !important;
+				}
+				&.right {
+					border-color: @child-right-color !important;
+				}
+			}
+		}
+		&.none {
+			outline-color: transparent !important;
+		}
+		&.parent {
+			outline-color: @parent-color !important;
+		}
+		&.child {
+			outline-color: @child-color !important;
+			&.left {
+				outline-color: @child-left-color !important;
+			}
+			&.right {
+				outline-color: @child-right-color !important;
+			}
+		}
+	}
+	.read {
+		color: @read-color !important;
+	}
+	.changed {
+		color: @write-color !important;
+	}
+
+	.value {
+		&.in-progress::before {
+			color: @solarized-blue;
+		}
+		&.done::before {
+			color: @solarized-green;
+		}
+		&.failed::before {
+			color: @solarized-red;
+		}
+	}
+}
+
+.code {
+	.kwd {
+		color: @solarized-blue;
+	}
+	.op {
+		color: @solarized-orange;
+	}
+	.fld {
+		color: @solarized-green;
+	}
+	.var {
+		//color: @solarized-green;
+	}
+	.typ {
+		color: @solarized-yellow;
+	}
+}
+
+.code.twisterrob {
+	background-color: black;
+	border-color: grey;
+	color: white;
+	.line {
+		&.active {
+			outline-color: white;
+			&::before, &::after {
+				background-color: gray;
+			}
+		}
+		&::before, &::after {
+			color: white;
+			background-color: black;
+		}
+		&::before, &::after {
+			border-color: gray;
+		}
+	}
+	.highlight {
+		background-color: darkblue;
+	}
+	.kwd {
+		color: #B0B0FF;
+	}
+	.op {
+		color: #FFFF80;
+	}
+	.fld {
+		color: #FFFF00;
+	}
+	.var {
+		color: #6AFF00;
+	}
+	.typ {
+		color: #FFFFCC;
+	}
+}
+
+// http://ethanschoonover.com/solarized/img/solarized-values-light.png
+// http://ethanschoonover.com/solarized/img/solarized-values-dark.png
+.rebase(@rebase03,@rebase02,@rebase01,@rebase00,@rebase0,@rebase1,@rebase2,@rebase3) {
+	background-color: @rebase3;
+	color: @rebase01;
+	border-color: @rebase0;
+	.code {
+		background-color: @rebase03;
+		color: @rebase0;
+		border-color: @rebase0;
+		.line {
+			&.active, &:hover {
+				background-color: @rebase02;
+				&::before, &::after { // line numbers
+					background-color: @rebase01;
+					color: @rebase1;
+				}
+			}
+			&::before, &::after { // line numbers
+				background-color: @rebase02;
+				color: @rebase00;
+				border-color: @rebase01;
+			}
+			&[title="magic"] {
+				color: @rebase01;
+			}
+		}
+		.highlight {
+			outline-color: @rebase0;
+		}
+	}
+	.vis {
+		.var, .var > .var-name {
+			border-color: @rebase1;
+		}
+		.var {
+			background-color: @rebase2;
+			&.highlight {
+				background-color: @rebase2;
+				outline-color: @rebase01;
+			}
+		}
+		.value {
+			background: @rebase3;
+			color: @rebase02;
+			border-color: @rebase1;
+		}
+		.connector {
+			border-color: @rebase1 !important; // there are importanter colors in .highlight
+		}
+	}
+}

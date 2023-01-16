@@ -1,0 +1,35 @@
+BODY {
+	font-family: Garamond;
+	font-size: 12pt;
+	background-color: #ADF;
+	color: #123;
+}
+TABLE TR TD {
+	border: 1px solid darkblue;
+}
+TH {
+	font-weight: bold;
+	font-family: Tahoma;
+}
+B {
+	font-family: Arial;
+	font-size: 11pt;
+}
+A.menu {
+	font-family: Tahoma;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 10pt;
+	color: #048;
+}
+A.menu:hover {
+	text-decoration: underline;
+}
+A.menu:visited {
+	color: #448;
+}
+.masculine {
+	
+}
+.feminine {
+}
