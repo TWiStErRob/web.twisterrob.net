@@ -293,9 +293,9 @@
 			}
 		};
 		function CurrentState() {
-			var calendar = "primary";
+			var calendar = "en.uk#holiday@group.v.calendar.google.com";
 			var from = moment().format("YYYY-MM-DD");
-			var to = moment().add(3, 'weeks').format("YYYY-MM-DD");
+			var to = moment().add(6, 'months').format("YYYY-MM-DD");
 			var timeZone = moment.tz.guess();
 			var lang = window.navigator.userLanguage || window.navigator.language;
 			var that; // the result to be referenced from methods
