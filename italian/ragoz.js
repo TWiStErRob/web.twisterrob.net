@@ -5,7 +5,7 @@ ragok = {
 	ire : ["o", "i", "e", "iamo", "ite", "ono"],
 	isc : ["isco", "isci", "isce", "isciamo", "iscite", "iscono"]
 };
-rendhagyók = {
+rendhagyÃ³k = {
 	venire : [["ven", "go"], ["vien", "i"], ["vien", "e"], ["ven", "iamo"], ["ven", "ite"], ["ven", "gono"]],
 	salire : [["sal", "go"], ["sal", "i"], ["sal", "e"], ["sal", "iamo"], ["sal", "ite"], ["sal", "gono"]],
 	dire : [["dic", "o"], ["dic", "i"], ["dic", "e"], ["dic", "iamo"], ["d", "ite"], ["dic", "ono"]],
@@ -13,29 +13,29 @@ rendhagyók = {
 	andare : [["vad", "o"], ["va", "i"], ["v", "a"], ["and", "iamo"], ["and", "ate"], ["v", "anno"]],
 	avere : [["h", "o"], ["ha", "i"], ["h", "a"], ["abb", "iamo"], ["av", "ete"], ["h", "anno"]]
 };
-function outputRagozás(igenév) {
-	var szótõ = "";
-	var végzõdés = "";
-	var eredmény = "Hibás ige!";
-	var rendhagyó = igenév.substring(igenév.length - 1, igenév.length) == "*";
-	if (rendhagyó) {
-		igenév = igenév.substring(0, igenév.length - 1);
+function outputRagozÃ¡s(igenÃ©v) {
+	var szÃ³tÅ‘ = "";
+	var vÃ©gzÅ‘dÃ©s = "";
+	var eredmÃ©ny = "HibÃ¡s ige!";
+	var rendhagyÃ³ = igenÃ©v.substring(igenÃ©v.length - 1, igenÃ©v.length) == "*";
+	if (rendhagyÃ³) {
+		igenÃ©v = igenÃ©v.substring(0, igenÃ©v.length - 1);
 	}
-	szótõ = igenév.slice(0, igenév.length - 3);
-	végzõdés = igenév.slice(igenév.length - 3, igenév.length);
-	if(rendhagyó && végzõdés == "ire") végzõdés = "isc";
-	eredmény = "";
+	szÃ³tÅ‘ = igenÃ©v.slice(0, igenÃ©v.length - 3);
+	vÃ©gzÅ‘dÃ©s = igenÃ©v.slice(igenÃ©v.length - 3, igenÃ©v.length);
+	if(rendhagyÃ³ && vÃ©gzÅ‘dÃ©s == "ire") vÃ©gzÅ‘dÃ©s = "isc";
+	eredmÃ©ny = "";
 		for(var i = 0; i < 6; ++i) {
-			igeMegRag = rendhagyók[igenév] === undefined?
-				szótõ + "<b>" + ragok[végzõdés][i] + "</b>"
+			igeMegRag = rendhagyÃ³k[igenÃ©v] === undefined?
+				szÃ³tÅ‘ + "<b>" + ragok[vÃ©gzÅ‘dÃ©s][i] + "</b>"
 				:
-				rendhagyók[igenév][i][0] + "<b>" + rendhagyók[igenév][i][1] + "</b>";
-			eredmény += ragok.sz[i] + ".: <i>" + igeMegRag + "</i><br>";
+				rendhagyÃ³k[igenÃ©v][i][0] + "<b>" + rendhagyÃ³k[igenÃ©v][i][1] + "</b>";
+			eredmÃ©ny += ragok.sz[i] + ".: <i>" + igeMegRag + "</i><br>";
 	}
-	document.all["ragoz"].innerHTML = "A" + (isVowel(igenév.substring(0, 1))?"z":"") + " <i>" + igenév + "</i> ragozása:<br>" + eredmény;
+	document.all["ragoz"].innerHTML = "A" + (isVowel(igenÃ©v.substring(0, 1))?"z":"") + " <i>" + igenÃ©v + "</i> ragozÃ¡sa:<br>" + eredmÃ©ny;
 }
 function isVowel(letter) {
-	var mghk = ["a","e","i","o","u","á","é","í","ó","ú","ö","õ","ü","û"];
+	var mghk = ["a","e","i","o","u","Ã¡","Ã©","Ã­","Ã³","Ãº","Ã¶","Å‘","Ã¼","Å±"];
 	for(x in mghk) {
 		if (letter == mghk[x]) {
 			return true;

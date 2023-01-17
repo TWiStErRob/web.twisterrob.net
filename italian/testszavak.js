@@ -8,7 +8,7 @@ function check(oj) {
 		l++;
 	}
 	volt[i] = true;
-	window.status = l + " / " + (jo.length - 1) + " jÛ v·laszod van.";
+	window.status = l + " / " + (jo.length - 1) + " j√≥ v√°laszod van.";
 }
 function jovalasz(index, value) {
 	var x = jo[index];

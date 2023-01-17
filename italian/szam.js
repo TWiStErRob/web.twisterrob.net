@@ -1,10 +1,10 @@
 /**
- * index	nÈv
+ * index	n√©v
  * 0 -20	ugyanaz
  * 21-27	30 - 100 step 10
- * 28-29	1 000: egyes, tˆbbes sz·m
- * 30-31	1 000 000: egyes, tˆbbes sz·m
- * 32-33	1 000 000 000: egyes, tˆbbes sz·m
+ * 28-29	1 000: egyes, t√∂bbes sz√°m
+ * 30-31	1 000 000: egyes, t√∂bbes sz√°m
+ * 32-33	1 000 000 000: egyes, t√∂bbes sz√°m
  * Checkarray: for (i=0;i<=33;i++) {alert(i + ": " + szamok[i])}
  */
 var szamok = ["","uno","due","tre","quattro","cinque","sei","sette","otto","nove","dieci","undici","dodici","tredici","quattordici","quindici","sedici","diciasette","diciotto","diciannove","venti","trenta","quaranta","cinquanta","sessanta","settanta","ottanta","novanta","cento","mille","mila","millione","milioni","miliardo","miliardi"];
@@ -16,17 +16,17 @@ function Kiszamol(szam) {
 	var milliosok = "";
 	var milliardosok = "";
 	var sorszam = false;
-	//null·kat leszedi az elejÈrıl
+	//null√°kat leszedi az elej√©r≈ël
 	while (szam.substring(0, 1) == "0") {
 		szam = szam.substring(1);
 	}
-	//sorsz·m 1.
+	//sorsz√°m 1.
 	if (szam.substring(szam.length - 1, szam.length) == "."
 		|| szam.substring(szam.length - 1, szam.length) == "o") {
 			sorszam = true;
 			szam = szam.substring(0, szam.length - 1);
 	}
-	//tÌzes+egyes
+	//t√≠zes+egyes
 	if (szam.length>=1) {
 		var TE = szam.substring(szam.length-2,szam.length)
 		E=TE.substring(1,2)
@@ -37,14 +37,14 @@ function Kiszamol(szam) {
 			if (TE>=20 && TE.substring(0,1)==i) {szamki = ((E==1 || E==8)?szamok[k].substring(0,szamok[k].length-1):szamok[k]) + szamok[parseInt(E)]}
 		}
 	}
-	//sz·zas
+	//sz√°zas
 	if (szam.length>=3) {
 		var S = szam.substring(szam.length-3,szam.length-2)
 		if (S>0) {szazasok = ((S==1)?"":szamok[S]) + szamok[28]}
 		if (szazasok) {((TE.substring(0,1)==1 || TE.substring(0,1)==8)? szamki = szazasok.substring(0,szazasok.length-1) + szamki:szamki = szazasok + szamki)}
 	
 	}
-	TSE = szamki //Ha bel¸lrıl hÌvta a vÈgÈn retunrolja
+	TSE = szamki //Ha bel√ºlr≈ël h√≠vta a v√©g√©n retunrolja
 	//ezres (mille, mila)
 	if (szam.length>=4) {
 		var EZ = szam.substring(szam.length-6,szam.length-3)
@@ -53,9 +53,9 @@ function Kiszamol(szam) {
 		if (ezresek) {((S==8)? szamki = ezresek.substring(0,ezresek.length-1) + szamki:szamki = ezresek + szamki)}
 	}
 	//hosszabb
-	if (szam.length>=7) {szamki="Bocsika, a program csak 999 999-ig kÈpes sz·molni!"}
-	//sorsz·m 2.
-	if (sorszam) {szamki = "<br>HÌmnem: <b>" + szamki.substring(0,szamki.length-1) + "esimo</b><br>" + "Nınem : <b>" + szamki.substring(0,szamki.length-1) + "esima</b>"}
-	document.all["szamki"].innerHTML = "<pre>" + "A(z) <i>" + szam + "</i> " + ((sorszam)?"sor":"") + "sz·m: <b>" + szamki + "</b></pre>"
+	if (szam.length>=7) {szamki="Bocsika, a program csak 999 999-ig k√©pes sz√°molni!"}
+	//sorsz√°m 2.
+	if (sorszam) {szamki = "<br>H√≠mnem: <b>" + szamki.substring(0,szamki.length-1) + "esimo</b><br>" + "N≈ënem : <b>" + szamki.substring(0,szamki.length-1) + "esima</b>"}
+	document.all["szamki"].innerHTML = "<pre>" + "A(z) <i>" + szam + "</i> " + ((sorszam)?"sor":"") + "sz√°m: <b>" + szamki + "</b></pre>"
 	return TSE;
 }
